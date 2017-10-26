@@ -1,0 +1,29 @@
+---
+# Set this to true if you want ANONYMOUS added to the list of superusers
+# (all communication on PLAINTEXT listeners will be treated as ANONYMOUS)
+ANONYMOUS_SUPERUSER: true
+
+# Should Kafka listen on the public ip address as well?
+EXTERNAL_LISTENERS: true
+
+# The list of user certificates to generate, these will be used by
+# consumers and producers if you want to connect to SSL ports
+client_certs:
+  - user1
+  - user2
+
+# Configure the ports that Kafka should listen on, make sure these
+# are allowed in your security group
+INTERNAL_PLAINTEXT_PORT: 9092
+INTERNAL_SSL_PORT: 9093
+EXTERNAL_PLAINTEXT_PORT: 9094
+EXTERNAL_SSL_PORT: 9095
+
+# Users that Kafka and Zookeeper should run as
+KAFKA_USER: confluent
+ZOOKEEPER_USER: confluent
+
+# Directory settings
+ZOOKEEPER_DATA: /var/lib/zookeeper
+KAFKA_DATA: /var/lib/kafka
+CONFIG_DIR: /etc/kafka

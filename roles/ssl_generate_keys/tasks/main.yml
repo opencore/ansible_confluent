@@ -1,0 +1,13 @@
+- name: Ensure correct permissions on directories
+  file: path=/etc/kafka/.ssl state=directory owner=confluent group=confluent mode=0755 recurse=no
+
+- name: Create certificate generation file
+  template: src=templates/generate_certs.sh.j2 dest=/etc/kafka/.ssl/generate_certs.sh owner=confluent group=confluent mode=744
+
+- name: Generate keys and csr
+  command: ./generate_certs.sh chdir=/etc/kafka/.ssl creates=/etc/kafka/.ssl/{{ inventory_hostname }}.csr
+  become: yes
+  become_user: confluent
+
+- name: Download CSR
+  fetch: src=/etc/kafka/.ssl/{{ inventory_hostname }}.csr dest=roles/shared_files/{{ inventory_hostname }}.csr flat=yes

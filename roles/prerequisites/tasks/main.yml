@@ -1,0 +1,23 @@
+- name: Benötigte Pakete installieren
+  yum: name={{ item }} update_cache=yes state=present
+  with_items:
+    - libselinux-python
+    - java-1.8.0-openjdk
+    - tmux
+
+- name: Gruppe für Kafka User erstellen
+  group:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ KAFKA_USER }}"
+    - "{{ ZOOKEEPER_USER }}"
+
+- name: User anlegen
+  user:
+    name: "{{ item }}"
+    group: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ KAFKA_USER }}"
+    - "{{ ZOOKEEPER_USER }}"

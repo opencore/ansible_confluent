@@ -1,0 +1,20 @@
+---
+- hosts: kafka
+  roles:
+    - prerequisites
+    - ssl_generate_keys
+  vars_files:
+    - vars/global_settings.yml
+
+- hosts: ca
+  roles:
+    - ssl_sign_keys
+  vars_files:
+    - vars/global_settings.yml
+
+- hosts: kafka
+  roles:
+    - ssl_distribute_keys
+    - kafka
+  vars_files:
+    - vars/global_settings.yml

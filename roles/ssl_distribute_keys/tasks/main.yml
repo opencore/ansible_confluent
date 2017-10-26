@@ -1,0 +1,26 @@
+- name: Upload CA certificate
+  copy: src=roles/shared_files/ca-cert dest=/etc/kafka/.ssl/ca-cert owner=confluent group=confluent force=no
+
+- name: Upload CA certificate
+  copy: src=roles/shared_files/{{ inventory_hostname }}.crt dest=/etc/kafka/.ssl/{{ inventory_hostname }}.crt owner=confluent group=confluent force=no
+
+- name: Generate truststore
+  command: keytool -keystore {{ inventory_hostname }}_truststore.jks -alias CARoot -import -file ca-cert -storepass foobar1234 -noprompt chdir=/etc/kafka/.ssl creates=/etc/kafka/.ssl/{{ inventory_hostname }}_truststore.jks
+  become: yes
+  become_user: confluent
+
+- name: Import ca into keystore
+  command: keytool -keystore {{ inventory_hostname }}.jks -alias CARoot -import -file ca-cert -storepass foobar1234 -noprompt chdir=/etc/kafka/.ssl creates=/etc/kafka/.ssl/ca_imported
+  become: yes
+  become_user: confluent
+
+- name: create stat file for ca import
+  file: path=/etc/kafka/.ssl/ca_imported state=touch owner=confluent group=confluent mode=0555
+
+- name: Import certificate into keystore
+  command: keytool -keystore {{ inventory_hostname }}.jks -alias {{ inventory_hostname }} -import -file {{ inventory_hostname }}.crt chdir=/etc/kafka/.ssl -storepass foobar1234 -noprompt creates=/etc/kafka/.ssl/cert_imported
+  become: yes
+  become_user: confluent
+
+- name: create stat file for cert import
+  file: path=/etc/kafka/.ssl/cert_imported state=touch owner=confluent group=confluent mode=0555

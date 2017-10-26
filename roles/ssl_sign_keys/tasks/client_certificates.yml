@@ -1,0 +1,37 @@
+- name: Upload user certificate generation script
+  template:
+    src: generate_client_certs.sh.j2
+    dest: /etc/kafka/.ca/generate_client_certs.sh
+    mode: 0755
+
+- name: Generate client certificates
+  shell: ./generate_client_certs.sh {{ item }}
+  args:
+    chdir: /etc/kafka/.ca
+    creates: /etc/kafka/.ca/{{ item }}.csr
+  with_items: "{{ client_certs }}"
+
+- name: Sign requests
+  shell: openssl x509 -req -CA ca-cert -CAkey ca-key -in {{ item }}.csr -out {{ item }}.crt -days 365 -CAcreateserial -passin pass:foobar1234
+  args:
+    chdir: /etc/kafka/.ca
+    creates: /etc/kafka/.ca/{{ item }}.crt
+  with_items: "{{ client_certs }}"
+
+- name: Import ca into keystore
+  shell: keytool -keystore {{ item }}.jks -alias CARoot -import -file ca-cert -storepass foobar1234 -noprompt >  {{ item }}.ca_imported
+  args:
+    chdir: /etc/kafka/.ca
+    creates: /etc/kafka/.ca/{{ item }}.ca_imported
+  with_items: "{{ client_certs }}"
+
+- name: Import certificate into keystore
+  shell: keytool -keystore {{ item }}.jks -alias {{ item }} -import -file {{ item }}.crt -storepass foobar1234 -noprompt > {{ item }}.cert_imported
+  args:
+    chdir: /etc/kafka/.ca
+    creates: /etc/kafka/.ca/{{ item }}.cert_imported
+  with_items: "{{ client_certs }}"
+
+- name: Download keystores
+  fetch: src=/etc/kafka/.ca/{{ item }}.jks dest=clientcerts/{{ item }}.jks flat=yes
+  with_items: "{{ client_certs }}"

@@ -1,0 +1,25 @@
+- name: Ensure correct permissions on directories
+  file: path=/etc/kafka/.ca state=directory owner=confluent group=confluent mode=0755 recurse=no
+
+- name: Generate ca
+  command: openssl req -new -x509 -keyout ca-key -out ca-cert -days 365 -passout pass:foobar1234 -subj "/C=DE/ST=Wedel/L=Wedel/O=OpenCore/OU=OpenCore/CN=opencore.com" chdir=/etc/kafka/.ca creates=/etc/kafka/.ca/ca-cert
+  become: yes
+  become_user: confluent
+
+- name: Download CA Certificate
+  fetch: src=/etc/kafka/.ca/ca-cert dest=roles/shared_files/ca-cert flat=yes
+
+- name: Upload signing requests
+  copy: src=roles/shared_files/{{ item }}.csr dest=/etc/kafka/.ca/{{ item }}.csr owner=confluent group=confluent force=no
+  with_items: "{{ groups['kafka'] }}"
+
+- name: Sign requests
+  command: openssl x509 -req -CA ca-cert -CAkey ca-key -in {{ item }}.csr -out {{ item }}.crt -days 365 -CAcreateserial -passin pass:foobar1234 chdir=/etc/kafka/.ca chdir=/etc/kafka/.ca creates=/etc/kafka/.ca/{{ item }}.crt
+  with_items: "{{ groups['kafka'] }}"
+
+- name: Download broker certificates
+  fetch: src=/etc/kafka/.ca/{{ item }}.crt dest=roles/shared_files/{{ item }}.crt flat=yes
+  with_items: "{{ groups['kafka'] }}"
+
+- name: Generate client certificates
+  include: client_certificates.yml

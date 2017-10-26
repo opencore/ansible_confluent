@@ -1,0 +1,15 @@
+[Unit]
+Description=Zookeeper
+Before=
+After=network.target
+
+[Service]
+User={{ ZOOKEEPER_USER }}
+
+ExecStart=/usr/bin/zookeeper-server-start {{ CONFIG_DIR }}/zookeeper.properties
+Restart=on-abort
+StandardOutput=journal
+EnvironmentFile=/etc/default/zookeeper
+
+[Install]
+WantedBy=multi-user.target

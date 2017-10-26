@@ -1,0 +1,16 @@
+[Unit]
+Description=Kafka
+Before=
+After=network.target zookeeper.service
+Requires=zookeeper.service
+
+[Service]
+User={{ KAFKA_USER }}
+
+ExecStart=/usr/bin/kafka-server-start {{ CONFIG_DIR }}/server.properties
+Restart=on-abort
+StandardOutput=journal
+EnvironmentFile=/etc/default/kafka
+
+[Install]
+WantedBy=multi-user.target

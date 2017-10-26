@@ -1,0 +1,88 @@
+
+
+- name: Install key for confluent repository
+  rpm_key: state=present key=http://packages.confluent.io/rpm/3.3/archive.key
+
+- name: Install confluent.dist repo
+  yum_repository:
+    baseurl: http://packages.confluent.io/rpm/3.3/7
+    name: confluent_dist
+    description: Confluent dist repository
+    gpgcheck: yes
+    gpgkey: http://packages.confluent.io/rpm/3.3/archive.key
+    enabled: yes
+
+- name: Install confluent repo
+  yum_repository:
+    baseurl: http://packages.confluent.io/rpm/3.3
+    name: confluent
+    description: Confluent base repository
+    gpgcheck: yes
+    gpgkey: http://packages.confluent.io/rpm/3.3/archive.key
+    enabled: yes
+
+- name: Install confluent platform
+  yum:
+    name: confluent-platform-oss-2.11
+    state: present
+    update_cache: yes
+
+- name: Create data & log directories
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.owner }}"
+  with_items:
+    - { path: "{{ KAFKA_DATA }}", owner: "{{ KAFKA_USER }}" }
+    - { path: "{{ ZOOKEEPER_DATA }}", owner: "{{ ZOOKEEPER_USER }}" }
+    - { path: "/var/log/kafka" , owner: "{{ KAFKA_USER }}"}
+
+- name: Create services
+  tags: config
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest}}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group}}"
+  with_items:
+    - {src: "zookeeper.service.j2", dest: "/usr/lib/systemd/system/zookeeper.service", owner: "root", group: "root"}
+    - {src: "kafka.service.j2", dest: "/usr/lib/systemd/system/kafka.service", owner: "root", group: "root"}
+    - {src: "zookeeper.j2", dest: "/etc/default/zookeeper", owner: "{{ ZOOKEEPER_USER }}", group: "{{ ZOOKEEPER_USER }}"}
+    - {src: "kafka.j2", dest: "/etc/default/kafka", owner: "{{ KAFKA_USER }}", group: "{{ KAFKA_USER }}"}
+  notify:
+    - reload systemd
+    - restart zookeeper
+    - restart kafka
+
+- name: Configure Zookeeper
+  tags: config
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest}}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group}}"
+  with_items:
+    - {src: "myid.j2", dest: "{{ ZOOKEEPER_DATA }}/myid", owner: "{{ ZOOKEEPER_USER }}", group: "{{ ZOOKEEPER_USER }}"}
+    - {src: "zookeeper.properties.j2", dest: "{{ CONFIG_DIR }}/zookeeper.properties", owner: "{{ ZOOKEEPER_USER }}", group: "{{ ZOOKEEPER_USER }}"}
+  notify:
+    - restart zookeeper
+
+- name: Configure Kafka
+  tags: config
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest}}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group}}"
+  with_items:
+    - {src: "server.properties.j2", dest: "{{ CONFIG_DIR }}/server.properties", owner: "{{ KAFKA_USER }}", group: "{{ KAFKA_USER }}"}
+  notify:
+    - restart kafka
+
+- name: Start services
+  tags: service
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - zookeeper.service
+    - kafka.service

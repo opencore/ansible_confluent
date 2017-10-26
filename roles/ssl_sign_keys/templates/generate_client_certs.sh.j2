@@ -1,0 +1,3 @@
+#!/bin/bash
+keytool -genkey -alias ${1} -keystore ${1}.jks -keyalg RSA -keysize 2048 -validity 712 -dname "CN=$1, OU=OpenCore, O=OpenCore, L=Wedel, ST=SH, C=DE" -storepass foobar1234 -keypass foobar1234
+keytool -certreq -alias ${1} -keystore ${1}.jks -file ${1}.csr -keyalg rsa -storepass foobar1234

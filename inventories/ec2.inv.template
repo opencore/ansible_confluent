@@ -1,0 +1,9 @@
+# Add kafka hosts as needed here and update ips as necessary
+[kafka]
+kafka1 ansible_host=<external ec2 ip>
+kafka2 ansible_host=<external ec2 ip>
+kafka3 ansible_host=<external ec2 ip>
+
+# Either select one of the above hosts to serve as the host to store ca files or provide a different host
+[ca]
+ca1 ansible_host=<external ec2 ip>

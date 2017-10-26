@@ -1,0 +1,12 @@
+---
+- name: reload systemd
+  sudo: yes
+  command: systemctl daemon-reload
+
+- name: restart zookeeper
+  sudo: yes
+  service: name=zookeeper.service state=restarted
+
+- name: restart kafka
+  sudo: yes
+  service: name=kafka.service state=restarted
