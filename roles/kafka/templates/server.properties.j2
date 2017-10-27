@@ -44,7 +44,7 @@ listener.security.protocol.map=INTERNAL:PLAINTEXT,INTERNAL_SSL:SSL,EXTERNAL_PLAI
 inter.broker.listener.name=INTERNAL_SSL
 
 ssl.client.auth=required
-super.users={% if ANONYMOUS_SUPERUSER %}User:ANONYMOUS;{% endif %}User:CN=kafka1,OU=OpenCore,O=OpenCore,L=Wedel,ST=SH,C=DE;User:CN=kafka2,OU=OpenCore,O=OpenCore,L=Wedel,ST=SH,C=DE;User:CN=kafka3,OU=OpenCore,O=OpenCore,L=Wedel,ST=SH,C=DE
+super.users={% if ANONYMOUS_SUPERUSER %}User:ANONYMOUS;{% endif %}{% for host in groups['kafka'] %}User:CN={{ hostvars[host]['ansible_fqdn'] }},OU=OpenCore,O=OpenCore,L=Wedel,ST=SH,C=DE{% if not loop.last %};{% endif %}{% endfor %}
 
 # Timeout in ms for connecting to zookeeper
 zookeeper.connection.timeout.ms=6000
@@ -143,7 +143,7 @@ log.retention.check.interval.ms=300000
 # server. e.g. "127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002".
 # You can also append an optional chroot string to the urls to specify the
 # root directory for all kafka znodes.
-zookeeper.connect=localhost:2181
+zookeeper.connect={% for host in groups['kafka'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2181{% if not loop.last %},{% endif %}{% endfor %}
 
 # Timeout in ms for connecting to zookeeper
 zookeeper.connection.timeout.ms=6000
