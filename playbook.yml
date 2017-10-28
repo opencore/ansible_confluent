@@ -6,7 +6,7 @@
   vars_files:
     - vars/global_settings.yml
 
-- hosts: ca
+- hosts: kafka[0]
   roles:
     - ssl_sign_keys
   vars_files:
