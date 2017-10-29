@@ -1,5 +1,5 @@
 provider "aws" {
-  region     = "us-east-1"
+  region     = "eu-central-1"
 }
 
 resource "aws_security_group" "oc_kafka" {
@@ -44,14 +44,12 @@ resource "aws_security_group_rule" "allow-ssh" {
 }
 
 data "aws_ami" "node-ami" {
-  most_recent      = true
-
-#  owners = ["410186602215"]
-
+  most_recent = true
   filter {
-    name   = "name"
-    values = ["Red Hat Enterprise Linux*"]
+    name = "image-id"
+    values = ["ami-d74be5b8"]
   }
+
 }
 
 resource "aws_key_pair" "kafka_key" {
@@ -87,5 +85,4 @@ resource "null_resource" "ansible-provision" {
   provisioner "local-exec" {
     command =  "echo \"${join("\n",formatlist("%s ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/id_rsa", aws_instance.brokers.*.public_ip))}\" >> ${var.name}-ansible-inventory"
   }
-
 }
