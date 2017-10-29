@@ -83,6 +83,6 @@ resource "null_resource" "ansible-provision" {
   }
 
   provisioner "local-exec" {
-    command =  "echo \"${join("\n",formatlist("%s ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/id_rsa", aws_instance.brokers.*.public_ip))}\" >> ${var.name}-ansible-inventory"
+    command =  "echo \"${join("\n",formatlist("%s ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/id_rsa", aws_instance.brokers.*.public_ip))}\" >> ansible-inventory"
   }
 }
