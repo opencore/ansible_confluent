@@ -3,3 +3,5 @@ roles/shared_files/**
 clientcerts/**
 inventories/*.inv
 playbook.retry
+*.tfstate
+*/.terraform/

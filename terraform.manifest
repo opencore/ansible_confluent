@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+TERRAFORM_FOLDER=terraform/
+PLAYBOOK=playbook.yml
