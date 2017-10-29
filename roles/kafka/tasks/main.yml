@@ -23,7 +23,7 @@
 
 - name: Install confluent platform
   yum:
-    name: confluent-platform-oss-2.11
+    name: confluent-platform-oss-2.11:3.3.0
     state: present
     update_cache: yes
 
