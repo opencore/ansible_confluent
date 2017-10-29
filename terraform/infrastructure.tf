@@ -79,7 +79,7 @@ resource "null_resource" "ansible-provision" {
   depends_on = ["aws_instance.brokers"]
 
   provisioner "local-exec" {
-    command =  "echo \"\n[kafka]\" > ${var.name}-ansible-inventory"
+    command =  "echo \"\n[kafka]\" > ansible-inventory"
   }
 
   provisioner "local-exec" {
