@@ -3,3 +3,4 @@
 TERRAFORM_FOLDER=terraform/
 PLAYBOOK=playbook.yml
 INVENTORY=ansible-inventory
+NAME_FILE=name.tf

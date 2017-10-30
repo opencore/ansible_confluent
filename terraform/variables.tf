@@ -1,5 +1,3 @@
-variable name {}
-
 variable aws-region {
   default = "eu-central-1"
 }
